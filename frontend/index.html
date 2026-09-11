@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TouristAI — See the Place. Know the Story.</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="nav">
+    <div class="brand"><span>✦</span> TouristAI</div>
+    <div class="nav-tag">AI Tourist Companion</div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="eyebrow">GEMINI-POWERED EXPLORATION</div>
+      <h1>See the Place.<br><em>Know the Story.</em></h1>
+      <p>Point your camera at history and let AI identify the landmark, verify it and tell you its story.</p>
+
+      <div class="scan-card">
+        <div id="previewWrap" class="preview-wrap hidden">
+          <img id="preview" alt="Selected landmark">
+          <button id="removeBtn" class="icon-btn">×</button>
+        </div>
+
+        <div id="dropzone" class="dropzone">
+          <div class="camera">⌾</div>
+          <h2>What are you looking at?</h2>
+          <p>Upload a monument photo or capture one with your camera.</p>
+          <div class="actions">
+            <label class="btn primary">📁 Upload Image<input id="fileInput" type="file" accept="image/*"></label>
+            <label class="btn secondary">📸 Take Photo<input id="cameraInput" type="file" accept="image/*" capture="environment"></label>
+          </div>
+        </div>
+
+        <div class="location-row">
+          <div>
+            <strong>📍 Use my location</strong>
+            <small>Optional — helps verify nearby landmarks</small>
+          </div>
+          <button id="locationBtn" class="toggle">Enable</button>
+        </div>
+
+        <button id="analyzeBtn" class="analyze" disabled>Analyze with Gemini ✦</button>
+        <div id="status" class="status"></div>
+      </div>
+    </section>
+
+    <section id="resultSection" class="result hidden">
+      <div id="resultBadge" class="badge">● VERIFIED</div>
+      <h2 id="landmarkName">Qutub Minar</h2>
+      <p id="description"></p>
+
+      <div class="confidence">
+        <div><span>AI confidence</span><strong id="confidenceText">94%</strong></div>
+        <div class="bar"><i id="confidenceBar"></i></div>
+        <small id="confidenceDetail"></small>
+      </div>
+
+      <div id="warning" class="warning hidden"></div>
+
+      <div id="guideArea" class="guide hidden">
+        <div class="guide-head">
+          <div>
+            <div class="eyebrow">AI TOURIST GUIDE</div>
+            <h3>Discover the story</h3>
+          </div>
+          <div class="controls">
+            <select id="language"><option>English</option><option>Hindi</option></select>
+            <select id="mode"><option>Tourist</option><option>Student</option><option>Child</option></select>
+          </div>
+        </div>
+        <div class="guide-grid">
+          <article><span>📜</span><h4>History</h4><p id="history"></p></article>
+          <article><span>🏛️</span><h4>Architecture</h4><p id="architecture"></p></article>
+          <article><span>🌏</span><h4>Significance</h4><p id="significance"></p></article>
+          <article><span>🤯</span><h4>Interesting facts</h4><ul id="facts"></ul></article>
+        </div>
+
+        <div class="ask">
+          <div class="ask-title">💬 Ask TouristAI</div>
+          <div class="ask-row">
+            <input id="question" placeholder="Who built this monument?">
+            <button id="askBtn">Ask ✦</button>
+          </div>
+          <p id="answer"></p>
+        </div>
+        <button id="listenBtn" class="listen">🔊 Listen to guide</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>Built for Hack Days Solan · TouristAI</footer>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+[
+  {
+    "name": "Qutub Minar",
+    "city": "Delhi",
+    "latitude": 28.5244,
+    "longitude": 77.1855
+  },
+  {
+    "name": "India Gate",
+    "city": "Delhi",
+    "latitude": 28.6129,
+    "longitude": 77.2295
+  },
+  {
+    "name": "Taj Mahal",
+    "city": "Agra",
+    "latitude": 27.1751,
+    "longitude": 78.0421
+  },
+  {
+    "name": "Red Fort",
+    "city": "Delhi",
+    "latitude": 28.6562,
+    "longitude": 77.241
+  },
+  {
+    "name": "Gateway of India",
+    "city": "Mumbai",
+    "latitude": 18.922,
+    "longitude": 72.8347
+  },
+  {
+    "name": "Hawa Mahal",
+    "city": "Jaipur",
+    "latitude": 26.9239,
+    "longitude": 75.8267
+  },
+  {
+    "name": "Mysore Palace",
+    "city": "Mysuru",
+    "latitude": 12.3052,
+    "longitude": 76.6552
+  },
+  {
+    "name": "Charminar",
+    "city": "Hyderabad",
+    "latitude": 17.3616,
+    "longitude": 78.4747
+  },
+  {
+    "name": "Victoria Memorial",
+    "city": "Kolkata",
+    "latitude": 22.5448,
+    "longitude": 88.3426
+  },
+  {
+    "name": "Sanchi Stupa",
+    "city": "Sanchi",
+    "latitude": 23.4793,
+    "longitude": 77.7397
+  },
+  {
+    "name": "Konark Sun Temple",
+    "city": "Konark",
+    "latitude": 19.8876,
+    "longitude": 86.0945
+  },
+  {
+    "name": "Fatehpur Sikri",
+    "city": "Fatehpur Sikri",
+    "latitude": 27.0945,
+    "longitude": 77.66
+  }
+]
