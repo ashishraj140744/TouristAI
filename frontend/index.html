@@ -36,10 +36,29 @@
 
         <div class="location-row">
           <div>
-            <strong>📍 Use my location</strong>
-            <small>Optional — helps verify nearby landmarks</small>
+            <strong id="locTitle">📍 Finding you…</strong>
+            <small id="locDetail">Looking up what's around you</small>
           </div>
-          <button id="locationBtn" class="toggle">Enable</button>
+          <button id="locationBtn" class="toggle hidden">Retry</button>
+        </div>
+
+        <div id="nearbyPanel" class="nearby hidden">
+          <div class="nearby-head">
+            <span id="nearbyCount"></span>
+            <button id="manualBtn" class="linkish">Set location manually</button>
+          </div>
+          <div id="nearbyList" class="nearby-list"></div>
+          <small class="nearby-hint">Tap a place to hear its story now — no photo needed.</small>
+        </div>
+
+        <div id="manualBox" class="manual hidden">
+          <input id="manualCoords" placeholder="30.9045, 77.0967">
+          <button id="manualGo" class="btn secondary">Go</button>
+          <div class="presets">
+            <button data-c="30.9045,77.0967">Solan</button>
+            <button data-c="30.8983,76.9647">Kasauli</button>
+            <button data-c="30.9667,77.1958">Chail</button>
+          </div>
         </div>
 
         <button id="analyzeBtn" class="analyze" disabled>Analyze with Gemini ✦</button>
@@ -49,11 +68,11 @@
 
     <section id="resultSection" class="result hidden">
       <div id="resultBadge" class="badge">● VERIFIED</div>
-      <h2 id="landmarkName">Qutub Minar</h2>
+      <h2 id="landmarkName"></h2>
       <p id="description"></p>
 
       <div class="confidence">
-        <div><span>AI confidence</span><strong id="confidenceText">94%</strong></div>
+        <div><span>Match confidence</span><strong id="confidenceText"></strong></div>
         <div class="bar"><i id="confidenceBar"></i></div>
         <small id="confidenceDetail"></small>
       </div>
@@ -78,6 +97,11 @@
           <article><span>🤯</span><h4>Interesting facts</h4><ul id="facts"></ul></article>
         </div>
 
+        <div id="practical" class="practical hidden">
+          <div class="eyebrow">BEFORE YOU GO IN</div>
+          <ul id="practicalList"></ul>
+        </div>
+
         <div class="ask">
           <div class="ask-title">💬 Ask TouristAI</div>
           <div class="ask-row">
@@ -91,7 +115,7 @@
     </section>
   </main>
 
-  <footer>Built for Hack Days Solan · TouristAI</footer>
+  <footer>Built for Hack Solan · TouristAI</footer>
   <script src="app.js"></script>
 </body>
 </html>
