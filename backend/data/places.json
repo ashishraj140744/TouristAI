@@ -1,0 +1,22 @@
+[
+  { "name": "Shoolini Mata Temple", "category": "temple", "city": "Solan", "latitude": 30.9036, "longitude": 77.0942 },
+  { "name": "Jatoli Shiv Temple", "category": "temple", "city": "Solan", "latitude": 30.8886, "longitude": 77.1236 },
+  { "name": "Mohan Shakti Heritage Park", "category": "heritage park", "city": "Solan", "latitude": 30.9481, "longitude": 77.0797 },
+  { "name": "Mohan Meakin Brewery", "category": "industrial heritage", "city": "Solan", "latitude": 30.9222, "longitude": 77.1064 },
+  { "name": "Solan Railway Station", "category": "railway heritage", "city": "Solan", "latitude": 30.9114, "longitude": 77.1058 },
+  { "name": "Barog Railway Tunnel No. 33", "category": "railway heritage", "city": "Barog", "latitude": 30.8983, "longitude": 77.0525 },
+  { "name": "Dagshai Jail Museum", "category": "museum", "city": "Dagshai", "latitude": 30.8853, "longitude": 77.0508 },
+  { "name": "Dagshai Church", "category": "church", "city": "Dagshai", "latitude": 30.8861, "longitude": 77.0492 },
+  { "name": "Kuthar Fort", "category": "fort", "city": "Kuthar", "latitude": 30.9333, "longitude": 76.9333 },
+  { "name": "Arki Fort", "category": "fort", "city": "Arki", "latitude": 31.1500, "longitude": 76.9667 },
+  { "name": "Karol Tibba", "category": "peak", "city": "Solan", "latitude": 30.9500, "longitude": 77.1167 },
+  { "name": "Yungdrung Bon Monastery", "category": "monastery", "city": "Solan", "latitude": 30.9750, "longitude": 77.0333 },
+  { "name": "Kali Ka Tibba Temple", "category": "temple", "city": "Chail", "latitude": 30.9667, "longitude": 77.2000 },
+  { "name": "Chail Palace", "category": "palace", "city": "Chail", "latitude": 30.9667, "longitude": 77.1958 },
+  { "name": "Chail Cricket Ground", "category": "landmark", "city": "Chail", "latitude": 30.9711, "longitude": 77.1997 },
+  { "name": "Kasauli Christ Church", "category": "church", "city": "Kasauli", "latitude": 30.8983, "longitude": 76.9647 },
+  { "name": "Kasauli Baba Balak Nath Temple", "category": "temple", "city": "Kasauli", "latitude": 30.8994, "longitude": 76.9631 },
+  { "name": "Sunset Point Kasauli", "category": "viewpoint", "city": "Kasauli", "latitude": 30.8975, "longitude": 76.9575 },
+  { "name": "Gurkha Fort Subathu", "category": "fort", "city": "Subathu", "latitude": 30.9736, "longitude": 76.9917 },
+  { "name": "Shoolini University", "category": "landmark", "city": "Solan", "latitude": 30.8628, "longitude": 77.1183 }
+]
