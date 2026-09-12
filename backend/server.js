@@ -4,6 +4,7 @@ const multer = require("multer");
 const path = require("path");
 const { identifyLandmark, generateGuide, askAbout } = require("./services/gemini");
 const { nearbyPlaces, placeContext } = require("./services/places");
+const cache = require("./services/cache");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -103,8 +104,12 @@ app.post("/api/guide", async (req, res) => {
   try {
     const { name, language = "English", mode = "Tourist", wikipedia = null } = req.body;
     if (!name) return res.status(400).json({ error: "Place name is required." });
-    const context = wikipedia ? await placeContext(wikipedia) : "";
-    res.json(await generateGuide(name, language, mode, context));
+
+    const { value, cached } = await cache.remember(cache.key("guide", name, language, mode), async () => {
+      const context = wikipedia ? await placeContext(wikipedia) : "";
+      return generateGuide(name, language, mode, context);
+    });
+    res.json({ ...value, cached });
   } catch (err) {
     fail(res, err);
   }
@@ -114,10 +119,17 @@ app.post("/api/ask", async (req, res) => {
   try {
     const { name, question, language = "English" } = req.body;
     if (!name || !question) return res.status(400).json({ error: "Place and question are required." });
-    res.json({ answer: await askAbout(name, question, language) });
+    const { value, cached } = await cache.remember(cache.key("ask", name, language, question), () =>
+      askAbout(name, question, language)
+    );
+    res.json({ answer: value, cached });
   } catch (err) {
     fail(res, err);
   }
+});
+
+app.get("/api/health", (req, res) => {
+  res.json({ ok: true, model: require("./services/gemini").MODEL, keyConfigured: Boolean(process.env.GEMINI_API_KEY), cache: cache.stats() });
 });
 
 app.get("*", (req, res) => {
