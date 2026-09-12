@@ -1,85 +1,130 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenAI } = require("@google/genai");
 
-function getModel() {
+const MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+let client = null;
+
+function getClient() {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("GEMINI_API_KEY is not configured.");
-  const genAI = new GoogleGenerativeAI(key);
-  return genAI.getGenerativeModel({ model: "gemini-3.8-flash" });
+  if (!client) client = new GoogleGenAI({ apiKey: key });
+  return client;
 }
 
-function cleanJson(text) {
-  const cleaned = text.replace(/```json/gi, "").replace(/```/g, "").trim();
-  const start = cleaned.indexOf("{");
-  const end = cleaned.lastIndexOf("}");
-  if (start < 0 || end < 0) throw new Error("Gemini returned an invalid JSON response.");
-  return JSON.parse(cleaned.slice(start, end + 1));
+// Structured output means we never parse free text. A prose reply (safety refusal,
+// "I can't identify people") used to throw and surface as a raw error on screen.
+const IDENTIFY_SCHEMA = {
+  type: "object",
+  properties: {
+    chosen_index: { type: "integer", description: "1-based index into the candidate list, or 0 for none of them" },
+    is_landmark: { type: "boolean" },
+    candidate_name: { type: "string" },
+    category: { type: "string" },
+    confidence: { type: "integer" },
+    visual_evidence: { type: "array", items: { type: "string" } },
+    needs_wider_photo: { type: "boolean" },
+    description: { type: "string" }
+  },
+  required: ["chosen_index", "is_landmark", "candidate_name", "category", "confidence", "visual_evidence", "needs_wider_photo", "description"]
+};
+
+const GUIDE_SCHEMA = {
+  type: "object",
+  properties: {
+    history: { type: "string" },
+    architecture: { type: "string" },
+    cultural_significance: { type: "string" },
+    important_dates: { type: "array", items: { type: "string" } },
+    historical_figures: { type: "array", items: { type: "string" } },
+    interesting_facts: { type: "array", items: { type: "string" } },
+    // Practical fields. Google Lens structurally cannot answer these.
+    dress_code: { type: "string" },
+    photography_allowed: { type: "string" },
+    timings: { type: "string" },
+    aarti_time: { type: "string" }
+  },
+  required: ["history", "architecture", "cultural_significance", "interesting_facts"]
+};
+
+const UNKNOWN = {
+  chosen_index: 0,
+  is_landmark: false,
+  candidate_name: "UNKNOWN",
+  category: "Unknown",
+  confidence: 0,
+  visual_evidence: [],
+  needs_wider_photo: true,
+  description: "Not enough visual evidence to name a place."
+};
+
+async function generateJson(contents, schema, temperature = 0.2) {
+  const res = await getClient().models.generateContent({
+    model: MODEL,
+    contents,
+    // The identify prompt's first rule is "do NOT guess" — temperature 1.0 fights that.
+    config: { responseMimeType: "application/json", responseSchema: schema, temperature }
+  });
+  try {
+    return JSON.parse(res.text);
+  } catch {
+    return null;
+  }
 }
 
 async function identifyLandmark(buffer, mimeType, nearby) {
-  const model = getModel();
-  const nearbyText = nearby.length
-    ? nearby.map((x, i) => `${i + 1}. ${x.name} — ${Math.round(x.distance)}m away`).join("\n")
-    : "No nearby landmark candidates were provided.";
+  const list = nearby.length
+    ? nearby.map((x, i) => `${i + 1}. ${x.name}${x.category ? ` (${x.category})` : ""} — ${Math.round(x.distance)}m away`).join("\n")
+    : "(none — no candidates were found near these coordinates)";
 
   const prompt = `You are TouristAI, a cautious visual heritage identification assistant.
 
-Analyze the image. Determine whether it contains a recognizable monument, historical site,
-religious site, tourist attraction, or architectural landmark.
+A user photographed something and we know roughly where they were standing. Below is the list of
+real places near those coordinates, pulled live from OpenStreetMap and Wikipedia.
 
-IMPORTANT:
-- Do NOT guess.
-- A generic wall, pillar, road, tree, ordinary building fragment, or unclear image must be UNKNOWN.
-- Nearby location candidates are only supporting context. Never select a landmark just because it is nearby.
-- Return confidence from 0 to 100.
-- If evidence is insufficient, is_landmark must be false, candidate_name must be UNKNOWN,
-  and needs_wider_photo must be true.
+CANDIDATES:
+${list}
 
-Nearby candidates:
-${nearbyText}
+Your task is MULTIPLE CHOICE, not open-ended recognition.
+- If the photo shows one of the candidates, set chosen_index to its number and candidate_name to that exact name.
+- If the photo clearly shows a notable landmark that is NOT in the list, set chosen_index to 0 and name it yourself.
+- If it is a generic wall, road, tree, person, vehicle, interior, meme, or an unclear/blurry image,
+  set chosen_index 0, is_landmark false, candidate_name "UNKNOWN", needs_wider_photo true.
+- Do NOT pick a candidate merely because it is nearby. The photo must actually support it.
+- Being wrong is far worse than saying UNKNOWN. When unsure, say UNKNOWN.
+- confidence is 0-100 and reflects VISUAL evidence only — ignore proximity when scoring it.
+- visual_evidence: short concrete things you actually see (dome shape, carving style, signage, colour, material).
+- description: two sentences, plain and factual.`;
 
-Return ONLY valid JSON:
-{
-  "is_landmark": true,
-  "candidate_name": "Qutub Minar",
-  "category": "Historical Monument",
-  "confidence": 94,
-  "visual_evidence": ["..."],
-  "needs_wider_photo": false,
-  "description": "..."
-}`;
-
-  const result = await model.generateContent([
-    { text: prompt },
-    { inlineData: { data: buffer.toString("base64"), mimeType } }
-  ]);
-  return cleanJson(result.response.text());
+  const out = await generateJson(
+    [{ role: "user", parts: [{ text: prompt }, { inlineData: { mimeType, data: buffer.toString("base64") } }] }],
+    IDENTIFY_SCHEMA
+  );
+  return out || UNKNOWN;
 }
 
-async function generateGuide(name, language = "English", mode = "Tourist") {
-  const model = getModel();
-  const prompt = `You are TouristAI, an accurate and engaging tourist guide.
-Create a concise guide for "${name}" in ${language}. Mode: ${mode}.
-Avoid invented facts. If a fact is uncertain, say so.
-Return ONLY valid JSON:
-{
-  "history": "...",
-  "architecture": "...",
-  "cultural_significance": "...",
-  "important_dates": ["..."],
-  "historical_figures": ["..."],
-  "interesting_facts": ["...", "...", "..."]
-}`;
-  const result = await model.generateContent(prompt);
-  return cleanJson(result.response.text());
+async function generateGuide(name, language = "English", mode = "Tourist", context = "") {
+  const prompt = `You are TouristAI, an accurate and engaging guide. Write about "${name}" in ${language}.
+Audience mode: ${mode} (Tourist = practical and vivid, Student = historical depth, Child = simple and playful).
+${context ? `Known facts about this place, treat as ground truth:\n${context}\n` : ""}
+Rules: never invent facts. If something is uncertain, say so plainly in ${language}.
+If it is a temple, gurudwara, church, mosque or any religious site, fill dress_code, photography_allowed,
+timings and aarti_time. If you genuinely do not know one of those, write "not known" — never guess them.
+Write ALL prose in ${language}.`;
+
+  const out = await generateJson([{ role: "user", parts: [{ text: prompt }] }], GUIDE_SCHEMA, 0.4);
+  if (!out) throw new Error("Could not generate a guide for this place. Please try again.");
+  return out;
 }
 
 async function askAbout(name, question, language = "English") {
-  const model = getModel();
-  const prompt = `You are TouristAI. Answer a tourist's question about "${name}" in ${language}.
-Be concise, natural and factual. Do not invent information.
-Question: ${question}`;
-  const result = await model.generateContent(prompt);
-  return result.response.text();
+  const res = await getClient().models.generateContent({
+    model: MODEL,
+    contents: [{ role: "user", parts: [{ text: `You are TouristAI. Answer a visitor's question about "${name}" in ${language}.
+Be concise, natural and factual. Never invent information — say you do not know if you do not.
+
+Question: ${question}` }] }],
+    config: { temperature: 0.4 }
+  });
+  return res.text;
 }
 
-module.exports = { identifyLandmark, generateGuide, askAbout };
+module.exports = { identifyLandmark, generateGuide, askAbout, MODEL };
